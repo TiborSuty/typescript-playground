@@ -65,6 +65,29 @@ type TupleInfer<T> = T extends [infer A, ...(infer B)[]] ? [A, B] : never;
 
 type test36 = TupleInfer<[string, number, boolean]>;
 
+type Length<T extends any[]> = T["length"];
+
+type test40 = Length<[]>;
+type test41 = Length<[any, any]>;
+type test42 = Length<[any, any, any]>;
+
+type Prepend<E, T extends any[]> = ((head: E, ...args: T) => any) extends (
+  ...args: infer U
+) => any
+  ? U
+  : T;
+
+type test43 = Prepend<string, []>;
+type test44 = Prepend<string, [1, 2]>;
+
+type Drop<N extends number, T extends any[], I extends any[] = []> = {
+  0: Drop<N, Tail<T>, Prepend<any, I>>;
+  1: T;
+}[Length<I> extends N ? 1 : 0];
+
+type test49 = Drop<2, [0, 1, 2, 3]>;
+type test50 = Drop<Length<test49>, [0]>;
+
 type CurryV0<P extends any[], R> = (
   arg0: Head<P>
 ) => HasTail<P> extends true ? CurryV0<Tail<P>, R> : R;
@@ -75,3 +98,20 @@ declare function curryV0<P extends any[], R>(
 
 const curried02 = curryV0(fn00);
 const test61 = curried02("Jane")(26)(true);
+
+type CurryV1<P extends any[], R> = (
+  arg0: Head<P>,
+  ...rest: Tail<Partial<P>>
+) => HasTail<P> extends true ? CurryV1<Tail<P>, R> : R;
+
+declare function curryV1<P extends any[], R>(
+  f: (...args: P) => R
+): CurryV1<P, R>;
+
+const toCurr07 = (name: string, age: number, ...nicknames: string[]) => true;
+const curried07 = curryV1(toCurr07);
+const test27 = curried07("Jane", 26, "JJ", "Jini");
+
+type CurryV2<P extends any[], R> = <T extends any[]>(
+  ...args: T
+) => HasTail<P> extends true ? CurryV2<Tail<T>, R> : R;
