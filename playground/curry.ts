@@ -25,7 +25,7 @@ type Last<T extends any[]> = {
   1: Head<T>;
 }[HasTail<T> extends true ? 0 : 1];
 
-type LastTest<T extends number> = { 0: "Test0"; 1: "Test1"; 2: "Test2" }[T];
+type LastTest<T extends string> = { 0: "Test0"; 1: "Test1"; 2: "Test2" }[T];
 
 type test = Last<[1, 2, 3, "jaj"]>;
 type test1 = LastTest<0>;
