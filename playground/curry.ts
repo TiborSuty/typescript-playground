@@ -88,6 +88,8 @@ type Drop<N extends number, T extends any[], I extends any[] = []> = {
 type test49 = Drop<2, [0, 1, 2, 3]>;
 type test50 = Drop<Length<test49>, [0]>;
 
+type Cast<X, Y> = X extends Y ? X : Y;
+
 type CurryV0<P extends any[], R> = (
   arg0: Head<P>
 ) => HasTail<P> extends true ? CurryV0<Tail<P>, R> : R;
@@ -108,10 +110,32 @@ declare function curryV1<P extends any[], R>(
   f: (...args: P) => R
 ): CurryV1<P, R>;
 
-const toCurr07 = (name: string, age: number, ...nicknames: string[]) => true;
-const curried07 = curryV1(toCurr07);
+const toCurry07 = (name: string, age: number, ...nicknames: string[]) => true;
+const curried07 = curryV1(toCurry07);
 const test27 = curried07("Jane", 26, "JJ", "Jini");
 
 type CurryV2<P extends any[], R> = <T extends any[]>(
   ...args: T
 ) => HasTail<P> extends true ? CurryV2<Tail<T>, R> : R;
+
+type CurryV5<P extends any[], R> = <T extends any[]>(
+  ...args: Cast<T, Partial<P>>
+) => Drop<Length<T>, P> extends [any, ...any[]]
+  ? // @ts-expect-error, Excessive stack depth comparing types
+    CurryV5<Cast<Drop<Length<T>, P>, any[]>, R>
+  : R;
+
+declare function curryV5<P extends any[], R>(
+  f: (...args: P) => R
+): CurryV5<P, R>;
+
+const toCurry09 = (
+  name: string,
+  age: number,
+  single: boolean,
+  ...nicknames: string[]
+) => true;
+const curried10 = curryV5(toCurry09);
+
+const test67 = curried10("Jane", 26)(true, "JJ", "Jini");
+const test68 = curried10("Jane")(26, true, "JJ", "Jini");
